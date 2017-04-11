@@ -256,18 +256,9 @@ ggplot(data.combined[1:891,],aes(x=Embarked,fill=survived)) +
   ylim(0,350)+
   labs(fill="Survived")
 
-
-
-#==============================================================================
-#
-# Video #4 - Exploratory Modeling
-#
-#==============================================================================
-
+# Train a Random Forest with the default parameters using pclass & Title
 
 library(randomForest)
-
-# Train a Random Forest with the default parameters using pclass & Title
 
 rf.train.1 <- data.combined[1:891, c("Pclass", "Title")]
 rf.label <- as.factor(train$survived)
@@ -343,20 +334,6 @@ rf.8 <- randomForest(x = rf.train.7, y = rf.label, importance = TRUE, ntree = 10
 rf.8
 varImpPlot(rf.8)
 
-
-
-#==============================================================================
-#
-# Video #5
-#
-#==============================================================================
-
-
-# Before we jump into features engineering we need to establish a methodology
-# for estimating our error rate on the test set (i.e., unseen data). This is
-# critical, for without this we are more likely to overfit. Let's start with a 
-# submission of rf.5 to Kaggle to see if our OOB error estimate is accurate.
-
 # Subset our test records and features
 test.submit.df <- data.combined[892:1309, c("Pclass", "Title", "family.size")]
 
@@ -369,22 +346,9 @@ submit.df <- data.frame(PassengerId = rep(892:1309), Survived = rf.5.preds)
 
 write.csv(submit.df, file = "RF_SUB_20160215_1.csv", row.names = FALSE)
 
-# Our submission scores 0.79426, but the OOB predicts that we should score 0.8159.
-# Let's look into cross-validation using the caret package to see if we can get
-# more accurate estimates
 library(caret)
 library(doSNOW)
 
-
-# Research has shown that 10-fold CV repeated 10 times is the best place to start,
-# however there are no hard and fast rules - this is where the experience of the 
-# Data Scientist (i.e., the "art") comes into play. We'll start with 10-fold CV,
-# repeated 10 times and see how it goes.
-
-
-# Leverage caret to create 100 total folds, but ensure that the ratio of those
-# that survived and perished in each fold matches the overall training set. This
-# is known as stratified cross validation and generally provides better results.
 set.seed(2348)
 cv.10.folds <- createMultiFolds(rf.label, k = 10, times = 10)
 
@@ -463,23 +427,13 @@ stopCluster(cl)
 rf.5.cv.3
 
 
-#==============================================================================
-#
-# Video #6 - Exploratory Modeling 2
-#
-#==============================================================================
-
-# Let's use a single decision tree to better understand what's going on with our
-# features. Obviously Random Forests are far more powerful than single trees,
-# but single trees have the advantage of being easier to understand.
-
 # Install and load packages
 #install.packages("rpart")
 #install.packages("rpart.plot")
 library(rpart)
 library(rpart.plot)
 
-# Per video #5, let's use 3-fold CV repeated 10 times 
+# let's use 3-fold CV repeated 10 times 
 
 # Create utility function
 rpart.cv <- function(seed, training, labels, ctrl) {
@@ -511,19 +465,6 @@ prp(rpart.1.cv.1$finalModel, type = 0, extra = 1, under = TRUE)
 
 
 
-
-
-# The plot bring out some interesting lines of investigation. Namely:
-#      1 - Titles of "Mr." and "Other" are predicted to perish at an 
-#          overall accuracy rate of 83.2 %.
-#      2 - Titles of "Master.", "Miss.", & "Mrs." in 1st & 2nd class
-#          are predicted to survive at an overall accuracy rate of 94.9%.
-#      3 - Titles of "Master.", "Miss.", & "Mrs." in 3rd class with 
-#          family sizes equal to 5, 6, 8, & 11 are predicted to perish
-#          with 100% accuracy.
-#      4 - Titles of "Master.", "Miss.", & "Mrs." in 3rd class with 
-#          family sizes not equal to 5, 6, 8, or 11 are predicted to 
-#          survive with 59.6% accuracy.
 
 
 # Both rpart and rf confirm that Title is important, let's investigate further
@@ -709,13 +650,9 @@ rpart.3.cv.1
 # Plot
 prp(rpart.3.cv.1$finalModel, type = 0, extra = 1, under = TRUE)
 
-
-#==============================================================================
-#
-# Video #7 - Submitting, scoring, and some analysis.
-#
-#==============================================================================
-
+    
+    
+    
 #
 # Rpart scores 0.80383
 #
@@ -756,15 +693,9 @@ write.csv(submit.df, file = "RF_SUB_20160619_1.csv", row.names = FALSE)
 
 
 
-#
-# If we want to improve our model, a good place to start is focusing on 
-# where it gets things wrong!
-# 
-
-
-# First, let's explore our collection of features using mutual information to
-# gain some additional insight. Our intuition is that the plot of our tree
-# should align well to the definition of mutual information.
+# Let's explore our collection of features using mutual information to
+# gain some additional insight. 
+    
 install.packages("infotheo")
 library(infotheo)
 
